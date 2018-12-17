@@ -1,0 +1,116 @@
+﻿@*<div>This is where you create the tenant onboarding page (Task 1)</div>*@
+
+<div class="ui form">
+    <div class="two fields">
+        <div class="fourteen wide field">
+            <label style="float: right">Date of Birth <span class="red-asterisk">*</span></label>
+            @*<input type="date" id="DOB" name="DateOfBirth" placeholder="&nbsp dd/mm/yyyy" data-bind="value : Model.DateOfBirth, valueUpdate:'afterkeydown'" />*@
+            <input type="text" id="DOB" name="DateOfBirth" placeholder="&nbsp dd/mm/yyyy" data-bind="datePicker : Model.DateOfBirth, dateTimePickerOptions : {format: 'DD/MM/YYYY', useCurrent : false}" />
+            <br /><br />
+
+            <label class="ss-vertical-space" style="float: right">Home Phone Number <span class="red-asterisk">*</span></label>
+            <input type="tel" name="HomePhoneNumber" placeholder="eg:097001234" data-bind="value: Model.HomePhoneNumber, valueUpdate:'afterkeydown'" />
+            <br /><br />
+
+            <label class="ss-vertical-space" style="float: right">Mobile Phone Number <span class="red-asterisk">*</span></label>
+            <input type="tel" name="MobilePhoneNumber" placeholder="eg:0212345678" data-bind="value : Model.MobilePhoneNumber, valueUpdate:'afterkeydown'" />
+            <br /><br />
+
+            <label for="searchTextField" class="ss-vertical-space" style="float: right">Current Address <span class="red-asterisk">*</span></label>
+            <input type="text" name="searchAddress" id="autocomplete" placeholder="&nbsp Enter your address" size="54" maxlength="120" data-bind="value: AddressField, addressAutocomplete : Model.Address, valueUpdate:'afterkeydown'">
+
+            <input type="hidden" name="Address.Number" data-bind="value : Model.Address.Number" />
+            <input type="hidden" name="Address.Street" data-bind="value : Model.Address.Street" />
+            <input type="hidden" name="Address.Suburb" data-bind="value : Model.Address.Suburb" />
+            <input type="hidden" name="Address.City" data-bind="value : Model.Address.City" />
+            <input type="hidden" name="Address.PostCode" data-bind="value : Model.Address.PostCode" />
+            <input type="hidden" name="Address.Latitude" data-bind="value : Model.Address.Latitude" />
+            <input type="hidden" name="Address.Longitude" data-bind="value : Model.Address.Longitude" />
+
+        </div>
+
+        <div class="col-md-12">
+            <div class="field">
+                <label>Please upload your photos here</label>
+                <div class="ui fluid segment upload-box te-logo">
+                    <div class="center aligned four column row">
+                        <div class="column">
+                            <div data-bind="foreach: MediaFiles">
+                                <div class="ui fluid segment image-box">
+                                    <div class="column">
+                                        <div class="image">
+                                            <div class="ui minix images" data-bind="if: ko.utils.unwrapObservable(MediaType) === 2">
+                                                <img class="ui image" />
+                                            </div>
+                                            <div class="ui minix images" data-bind="ifnot: ko.utils.unwrapObservable(MediaType) === 2">
+                                                <img class="ui image" data-bind="attr: {src: Data}" />
+                                            </div>
+                                        </div>
+                                        <i class="remove sign icon" data-bind="click: $root.RemoveFile"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="field">
+                <p class="text-muted hint-style" data-bind="text: fileInstructions"></p>
+                <div class="ui teal button upload-button">
+                    <i class="cloud upload icon"></i>
+                    Choose Files
+                    <input type="file"
+                           id="file-upload"
+                           class="key-upload"
+                           data-bind="filesUpload : MediaFiles,
+                            fileWarning : FileWarning,
+                            validFileTypes : ValidFiles,
+                            maxFiles: MaxFiles,
+                            totalMaxSize : MaxSize,
+                            sizeError : fileSizeError" multiple />
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<br />
+
+
+<script>
+    function disableSaveButton() {
+        document.getElementById("Save").disabled = true;
+        document.getElementById("Save").innerHTML = "Saving...";
+    }
+
+    $(document).ready(function () {
+
+        ko.applyBindings(new TenantInfoVm());
+
+    });
+
+</script>
+
+<style>
+    a.action-button {
+        text-decoration: none;
+        font-size: 13px;
+        box-sizing: border-box;
+    }
+
+    body {
+        position: relative;
+        padding-top: 65px;
+        padding-right: 0 !important;
+        /*background : #edf1f7;*/
+        /*background: #f9fafc;*/
+        /*background : #f7f9fc;*/
+        /*background : #efefef;*/
+        /*background : #f4f5f7;*/
+        /*background : #f7f7f7;*/
+        /*background : #f2f2f2;*/
+        /*background : #fcfcfc;*/
+        overflow: inherit;
+    }
+</style>

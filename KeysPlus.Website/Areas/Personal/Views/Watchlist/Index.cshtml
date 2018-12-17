@@ -1,0 +1,1358 @@
+﻿@model WatchlistDisplayModel
+@{
+    ViewBag.Title = "Property Community | Watchlist";
+}
+
+<div id="mainPage" data-bind="visible:MainView">
+    <div class="block-header">
+        <h3>Watchlist</h3>
+    </div>
+    <br />
+    @{
+        Html.RenderPartial("_SearchInput");
+    }
+    <br />
+
+
+    <br />
+    @if (Model.ItemType == ItemType.RentalListing)
+    {
+        <ul class="nav nav-tabs" role="tablist">
+
+            <li class="active"><a href="/Personal/Watchlist?ItemType=RentalListing">Rental Listings</a></li>
+            <li class=""><a href="/Personal/Watchlist?ItemType=MarketJob">Market Jobs</a></li>
+        </ul>
+    }
+    else
+    {
+        <ul class="nav nav-tabs" role="tablist">
+
+            <li class=""><a href="/Personal/Watchlist?ItemType=RentalListing">Rental Listings</a></li>
+            <li class="active"><a href="/Personal/Watchlist?ItemType=MarketJob">Market Jobs</a></li>
+        </ul>
+    }
+    <br /> @*start*@
+
+    @if (Model.ItemType == ItemType.RentalListing)
+    {
+        <!--Display for Rental Listings-->
+        <div class="ui three special cards" data-bind="foreach : Items">
+            <div class="ui card">
+                <div class="blurring dimmable image">
+                    <div data-bind="visible:ImgFiles().length>0">
+                        <div class="carousel " data-ride="carousel" data-bind="attr :{id : 'carousel'+ Model.Id()}">
+                            <div class="carousel-inner" style="margin:auto" data-bind="foreach: ImgFiles">
+                                <div class="item thumbnail" data-bind="css:{active: $index() == 0}">
+                                    <img class="img-responsive" data-bind="attr: {src: Data}"
+                                         onerror="this.src = '/images/no-prop-img.png'" alt="firstImg" style="width:100%; height: 250px;">
+                                </div>
+                            </div>
+
+                            <a class="left carousel-control" data-slide="prev" data-bind="attr : {href : '#' + 'carousel'+ Model.Id()}">
+                                <span class="fa fa-2x fa-angle-left"></span>
+                                <span class="sr-only">Previous</span>
+                            </a>
+                            <a class="right carousel-control" data-slide="next" data-bind="attr : {href : '#' + 'carousel'+ Model.Id()}">
+                                <span class="fa fa-2x fa-angle-right"></span>
+                                <span class="sr-only">Next</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div data-bind="visible:ImgFiles().length<=0">
+                        <img class="img-thumbnail" src="/images/no-prop-img.png" alt="noPropImg" />
+                    </div>
+                </div> <!-- div image -->
+
+                <div class="content">
+                    <div class="ui header" data-bind="text : Model.Title"></div>
+                    <div class="description">
+                        <div>
+                            <span data-bind="text:Property.Bedroom"></span>&nbsp;<i class="bed icon"></i>
+                            &nbsp;&nbsp;<span data-bind="text:Property.Bathroom"></span>&nbsp;<i class="bath icon"></i>
+                            &nbsp;&nbsp;<span data-bind="text:Property.ParkingSpace"></span>&nbsp;<i class="car icon"></i>
+                        </div>
+                    </div>
+                    <div class="description">
+
+                        <strong>Id: </strong>
+
+
+                        # <span data-bind="text : Model.Id"></span>
+
+                    </div>
+                    <div class="description">
+
+                        <strong>Location: </strong>
+
+
+                        <span data-bind="text : StreetAddress"></span>
+                        <div data-bind="text : CitySub"></div>
+
+                    </div>
+                    <div class="description">
+
+                        <strong>Rent: </strong>
+
+
+                        $<span data-bind="numeric : Model.TargetRent"></span>&nbsp;
+
+                    </div>
+                    <div class="description">
+
+                        <strong>Available: </strong>
+
+
+                        <span data-bind="text : moment(Model.AvailableDate()).format('ll')"></span>
+
+                    </div>
+                </div>
+                <div class="row extra content">
+                    <div class="text-center">
+                        <button class="tiny ui button" data-bind="click: $root.ShowDetails, clickShowMap: Address" data-step="7" data-intro="See more detail">
+                            <i class="info circle icon"></i>
+                            Details
+                        </button>
+                        <!--Disable apply button if user is not a tenant-->
+                        <div data-bind="attr: {class : !$root.IsUserTenant() || View.IsOwner() || View.IsApplied() ? 'disable-tooltip inline' : 'inline'}">
+                            <button class="tiny ui teal button"
+                                    data-bind="click: $root.ApplyRental, enable: $root.IsUserTenant() && !View.IsOwner() && !View.IsApplied()">
+                                <i class="pencil alternate icon"></i>
+                                Apply
+                            </button>
+                            <span data-bind="ifnot: $root.IsUserTenant">
+                                <span class="tooltiptext tooltipstyle-keys">
+                                    You are not a tenant please click <a href='/Account/AddRoleToLogin?roleId=5'>here</a> to register
+                                </span>
+                            </span>
+                            <span data-bind="if: View.IsOwner()">
+                                <span class="tooltiptext tooltipstyle-keys">
+                                    You are the owner of this property
+                                </span>
+                            </span>
+                            <span data-bind="if: View.IsApplied()">
+                                <span class="tooltiptext tooltipstyle-keys">
+                                    You have already applied for this rental
+                                </span>
+                            </span>
+                        </div>
+                        <button class="tiny ui button" data-bind="click: $root.DeleteWatchlist"><i class="trash icon"></i>Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!--Display for Market Jobs-->
+        <div class="ui three special cards" data-bind="foreach : Items">
+            <div class="ui card">
+                <div class="blurring dimmable image">
+                    <div data-bind="visible:ImgFiles().length>0">
+                        <div class="carousel " data-ride="carousel" data-bind="attr :{id : 'carousel'+ Model.Id()}">
+                            <div class="carousel-inner" style="margin:auto" data-bind="foreach: ImgFiles">
+                                <div class="item thumbnail" data-bind="css:{active: $index() == 0}">
+                                    <img class="img-responsive" data-bind="attr: {src: Data}"
+                                         onerror="this.src = '/images/no-prop-img.png'" alt="firstImg">
+                                </div>
+                            </div>
+                            <a class="left carousel-control" data-slide="prev" data-bind="attr : {href : '#' + 'carousel'+ Model.Id()}">
+                                <span class="fa fa-2x fa-angle-left"></span>
+                                <span class="sr-only">Previous</span>
+                            </a>
+                            <a class="right carousel-control" data-slide="next" data-bind="attr : {href : '#' + 'carousel'+ Model.Id()}">
+                                <span class="fa fa-2x fa-angle-right"></span>
+                                <span class="sr-only">Next</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div data-bind="visible:ImgFiles().length<=0" class="thumbnail">
+                        <img src="/images/no-prop-img.png" alt="noPropImg" />
+                    </div>
+                </div><!-- div image -->
+                <div class="content">
+                    <div class="ui header" data-bind="text : Model.Title"></div>
+                    <div class="description">
+                        <div>
+                            <strong>ID: </strong>
+                            #<span data-bind="text :  Model.WatchListId"></span>
+                        </div>
+                    </div>
+                    <div class="description">
+                        <div>
+                            <strong>Listed on: </strong>
+                            <span data-bind="text :  moment(Model.PostedDate()).format('ll')"></span>
+                        </div>
+                    </div>
+                    <div class="description">
+                        <div>
+                            <strong>Budget: </strong>
+                            $<span data-bind="numeric :  Model.MaxBudget"></span>
+                        </div>
+                    </div>
+                    <div class="description">
+                        <div>
+                            <strong>Address: </strong>
+                            <div data-bind="text : StreetAddress"></div>
+                            <div data-bind="text : CitySub"></div>
+                        </div>
+                    </div>
+                    <div class="description">
+                        <div>
+                            <strong>Description: </strong>
+                            <div data-bind="text : Model.JobDescription"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row extra content">
+                    <div class="text-center">
+                        <button class="tiny ui button"
+                                data-bind="click:$root.ShowDetails, clickShowMap : Address">
+                            <i class="info circle icon"></i> Details
+                        </button>
+                        <div data-bind=" attr:{class: !$root.IsUserServiceSupply() || Market.IsApplyByUser || Market.IsOwnedByUser ? 'disable-tooltip inline' : 'inline' }">
+                            <button class="tiny ui teal button"
+                                    data-bind="click : $root.ShowApply, enable: $root.IsUserServiceSupply()&&!Market.IsApplyByUser()&&!Market.IsOwnedByUser()">
+                                <i class="pencil alternate icon"></i> Apply
+                            </button>
+                            <span data-bind="ifnot : $root.IsUserServiceSupply">
+                                <span class="tooltiptext tooltipstyle-keys"> You are not a service supplier please click this <a href='/Account/AddRoleToLogin?roleId=6'>link</a> to become a service supplier</span>
+                            </span>
+                            <span data-bind="if:  Market.IsApplyByUser">
+                                <span class="tooltiptext tooltipstyle-keys"> You applied for this job.</span>
+                            </span>
+                            <span data-bind="if:  Market.IsOwnedByUser">
+                                <span class="tooltiptext tooltipstyle-keys"> You are the owner for this job.</span>
+                            </span>
+                        </div>
+                        <button class="tiny ui button" data-bind="click: $root.DeleteWatchlist"><i class="trash icon"></i>Delete</button>
+                    </div>
+                </div><!-- /div button group -->
+            </div> <!-- /class = "ui card" -->
+        </div>
+    }
+    
+    @{ Html.RenderPartial("_PagedItems");}
+</div>
+
+<!-- /div MainView -->
+@if (Model.ItemType == ItemType.RentalListing)
+{
+    <!--Detail view for rental watchlist-->
+    <div id="detailView" data-bind="visible: DetailView" style="display : none">
+        <button class="ui button button-margin" data-bind="click: $root.ShowMain">
+            <i class="arrow alternate circle left icon"></i>
+            Back
+        </button>
+        <br /><br />
+        <div id="rental-property-details" class="ui column" data-bind="with: SelectedItem">
+            <div class="ui top attached block header">
+                <div class="ui two column grid">
+                    <div class="column">
+                        <div class="ui header">
+                            <span data-bind="text: Model.Title"></span>
+                            <div class="sub header">
+                                Listed: &nbsp;
+                                <span data-bind="text: moment(Property.CreatedDate()).format('ll')"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="middle aligned column">
+                        <!-- Disable apply button if user is not a tenant-->
+                        <div data-bind="attr: {class: !$root.IsUserTenant() || View.IsOwner() || View.IsApplied() ? 'disable-tooltip inline' : 'inline'}"
+                             style="float:right">
+                            <button class="ui teal button"
+                                    data-bind="click: $root.ApplyRental, enable: !View.IsOwner() && !View.IsApplied()"
+                                    data-step="8"
+                                    data-intro="Check everything then apply">
+                                <i class="pencil alternate icon"></i>
+                                Apply
+                            </button>
+
+                            <span data-bind="if: View.IsOwner()">
+                                <span class="tooltiptext tooltipstyle-keys tooltipstyle-keys-propertiesforrent">
+                                    You are the owner of this property
+                                </span>
+                            </span>
+                            <span data-bind="if: View.IsApplied()">
+                                <span class="tooltiptext tooltipstyle-keys tooltipstyle-keys-propertiesforrent">
+                                    You have already applied for this rental
+                                </span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ui bottom attached segment">
+                <div class="keys-heading pad-bottom">Rental Listing Information</div>
+                <div class="ui mobile reversed stackable two column grid">
+                    <!--details column-->
+                    <div class="ten wide column">
+                        <div class="ui relaxed list">
+                            <div class="item">
+                                <div class="ui two column grid">
+                                    <div class="five wide column">
+                                        <strong>Location:</strong>
+                                    </div>
+                                    <div class="ten wide column">
+                                        <span data-bind="text: StreetAddress"></span>
+                                        <span data-bind="text: CitySub"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="item">
+                                <div class="ui two column grid">
+                                    <div class="five wide column">
+                                        <strong>Rent:</strong>
+                                    </div>
+                                    <div class="ten wide column">
+                                        <span data-bind="numeric: Model.TargetRent"></span>
+                                        &nbsp;<span data-bind="text: Property.RentalPaymentType"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="item">
+                                <div class="ui two column grid">
+                                    <div class="five wide column">
+                                        <strong>Property Type:</strong>
+                                    </div>
+                                    <div class="ten wide column">
+                                        <span data-bind="text: Property.PropertyType"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="item">
+                                <div class="ui two column grid">
+                                    <div class="five wide column">
+                                        <strong>Rooms:</strong>
+                                    </div>
+                                    <div class="ten wide column">
+                                        <span data-bind="text: Property.Bedroom"></span>
+                                        &nbsp;<i class="fa fa-bed"></i>&nbsp;&nbsp;
+                                        <span data-bind="text: Property.Bathroom"></span>
+                                        &nbsp;<i class="fa fa-shower"></i>&nbsp;&nbsp;
+                                        <span data-bind="text: Property.ParkingSpace"></span>
+                                        &nbsp;<i class="fa fa-car"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="item">
+                                <div class="ui two column grid">
+                                    <div class="five wide column">
+                                        <strong>Land Area:</strong>
+                                    </div>
+                                    <div class="ten wide column">
+                                        <span data-bind="if: Property.LandSqm">
+                                            <span data-bind="text: Property.LandSqm"></span>m<sup>2</sup>
+                                        </span>
+                                        <span data-bind="ifnot: Property.LandSqm">Not Available</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="item">
+                                <div class="ui two column grid">
+                                    <div class="five wide column">
+                                        <strong>Floor Area:</strong>
+                                    </div>
+                                    <div class="ten wide column">
+                                        <span data-bind="if: Property.FloorArea">
+                                            <span data-bind="text: Property.FloorArea"></span>m<sup>2</sup>
+                                        </span>
+                                        <span data-bind="ifnot: Property.FloorArea">Not Available</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="item">
+                                <div class="ui two column grid">
+                                    <div class="five wide column">
+                                        <strong>No. of Occupants:</strong>
+                                    </div>
+                                    <div class="ten wide column">
+                                        <span data-bind="text: Model.OccupantCount"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="item">
+                                <div class="ui two column grid">
+                                    <div class="five wide column">
+                                        <strong>Moving Cost:</strong>
+                                    </div>
+                                    <div class="ten wide column">
+                                        <span data-bind="numeric: Model.MovingCost"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="item">
+                                <div class="ui two column grid">
+                                    <div class="five wide column">
+                                        <strong>Furnishing:</strong>
+                                    </div>
+                                    <div class="ten wide column">
+                                        <span data-bind="text: Model.Furnishing"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="item">
+                                <div class="ui two column grid">
+                                    <div class="five wide column">
+                                        <strong>Pets Allowed:</strong>
+                                    </div>
+                                    <div class="ten wide column">
+                                        <span data-bind="text: Model.PetsAllowed"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="item">
+                                <div class="ui two column grid">
+                                    <div class="five wide column">
+                                        <strong>Available Date:</strong>
+                                    </div>
+                                    <div class="ten wide column">
+                                        <span data-bind="text: moment(Model.AvailableDate()).format('ll')"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="item">
+                                <div class="ui two column grid">
+                                    <div class="five wide column">
+                                        <strong>Description:</strong>
+                                    </div>
+                                    <div class="ten wide column">
+                                        <span data-bind="text: Model.Description"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div> <!--details column-->
+                    <!--photo column-->
+                    <div class="right floated six wide column">
+                        <div data-bind="visible: ImgFiles().length > 0">
+                            <div class="carousel"
+                                 data-ride="carousel"
+                                 data-bind="attr: {id: 'slide' + Model.Id()}">
+                                <div class="carousel-inner" data-bind="foreach: ImgFiles">
+                                    <!--style="margin:auto"-->
+                                    <div class="item thumbnail" data-bind="css: {active: $index() == 0}">
+                                        <img class="property-details-image img-responsive"
+                                             data-bind="attr: {src: Data}"
+                                             onerror="this.src = '/images/no-prop-img.png'"
+                                             alt="firstImg" />
+                                    </div>
+                                </div>
+                                <a class="left carousel-control"
+                                   data-slide="prev"
+                                   data-bind="attr: {href: '#' + 'slide'+ Model.Id()}">
+                                    <span class="fa fa-2x fa-angle-left"></span>
+                                    <span class="sr-only">Previous</span>
+                                </a>
+                                <a class="right carousel-control"
+                                   data-slide="next"
+                                   data-bind="attr: {href: '#' + 'slide'+ Model.Id()}">
+                                    <span class="fa fa-2x fa-angle-right"></span>
+                                    <span class="sr-only">Next</span>
+                                </a>
+                            </div>
+                        </div>
+                        <div data-bind="visible: ImgFiles().length <= 0" class="thumbnail">
+                            <img class="property-details-image"
+                                 src="/images/no-prop-img.png"
+                                 alt="noPropImg" />
+                        </div>
+                    </div> <!--photo column-->
+                </div>
+                <div class="ui section divider"></div>
+                <!--map segment-->
+                <div data-bind="visible: $root.HasMapData()">
+                    <div class="ui top attached tabular menu">
+                        <a class="item active" data-bind="clickShowMap: Address">Location</a>
+                        <a class="item" data-bind="clickShowSchoolsNearBy: Address">Schools near by</a>
+                        <a class="item" data-bind="clickShowTransport: Address">Transport near by</a>
+                    </div>
+                    <div class="ui bottom attached segment">
+                        <div id="map"></div>
+                    </div>
+                </div> <!--map segment-->
+            </div> <!--panel-body-->
+        </div> <!--panel-primary-->
+    </div> <!--rental-property-details-->
+
+    <!--Apply view for rental watchlist-->
+    <div data-bind="visible : ApplyView" style="display:none" class="key-div-container">
+
+<!--Problem with modal: when rental watchlist empty, modal appears when it shouldn't-->
+        @*<div class="modal fade" id="myModal" role="dialog">
+            <div class="ui small modal" id="confirmModal">
+                <h4 class="header">Confirmation</h4>
+                <p class="content">Are you sure you want to leave this page?</p>
+                <div class="actions">
+
+                    <button type="button" class="ui button teal" onclick="location.href=''">Yes</button>
+                    <button type="button" class="ui button" data-bind="click: closeConfirmation">No</button>
+                </div>
+            </div>
+
+        </div>*@<!-- /.modal -->
+        <div class="back-button-margin">
+            <button class="ui button" data-bind="click: $root.ShowMain" @*data-bind="click: confirmationModal"*@><i class="arrow alternate circle left icon"></i>Back</button>
+        </div>
+        <br />
+        <form class="ui form step-form">
+            <fieldset class="keys-fieldset">
+                <div class="keys-heading">Rental Application Form</div>
+
+                <h4 class="ui header">Listing Information:</h4>
+
+
+                <div id="tenant-application" class="step-form new-prop ui form full-width" data-bind="with : SelectedItem">
+                    <div class="field">
+
+                        <div class="two fields">
+                            <div class="field">
+                                <div class="ui grid">
+                                    <div class="five wide column">
+                                        <h4 class="ui grey header">Address :</h4>
+                                    </div>
+                                    <div class="ten wide column">
+                                        <span data-bind="text: StreetAddress"></span>
+                                        <span data-bind="text: CitySub"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="field">
+                                <div class="ui grid">
+                                    <div class="five wide column">
+                                        <h4 class="ui grey header">Rooms :</h4>
+                                    </div>
+                                    <div class="ten wide column">
+                                        <span data-bind="text:Property.Bedroom"></span>&nbsp;<i class="fa fa-bed"></i>
+                                        &nbsp;&nbsp;<span data-bind="text:Property.Bathroom"></span>&nbsp;<i class="fa fa-shower"></i>
+                                        &nbsp;&nbsp;<span data-bind="text:Property.ParkingSpace"></span>&nbsp;<i class="fa fa-car"></i>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="two fields">
+                            <div class="field">
+                                <div class="ui grid">
+                                    <div class="five wide column">
+                                        <h4 class="ui grey header">No. of Occupants:</h4>
+                                    </div>
+                                    <div class="ten wide column" data-bind="text:Model.OccupantCount">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="field">
+                                <div class="ui grid">
+                                    <div class="five wide column">
+                                        <h4 class="ui grey header">Moving Cost:</h4>
+                                    </div>
+                                    <div class="ten wide column">
+                                        $<span data-bind="numeric:Model.MovingCost"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="two fields">
+                            <div class="field">
+                                <div class="ui grid">
+                                    <div class="five wide column">
+                                        <h4 class="ui grey header">Furnishing:</h4>
+                                    </div>
+                                    <div class="ten wide column" data-bind="text:Model.Furnishing">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="field">
+                                <div class="ui grid">
+                                    <div class="five wide column">
+                                        <h4 class="ui grey header">Pets Allowed:</h4>
+                                    </div>
+                                    <div class="ten wide column" data-bind="text:Model.PetsAllowed">
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="two fields">
+
+                            <div class="field">
+                                <div class="ui grid">
+                                    <div class="five wide column">
+                                        <h4 class="ui grey header">Available Date:</h4>
+                                    </div>
+                                    <div class="ten wide column" data-bind="text : moment(Model.AvailableDate()).format('ll')">
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+
+
+                <div data-bind="with : RentalApplication">
+                    <div class="field">
+                        <label>Number of Tenants <span class="red-asterisk">*</span></label>
+                        <div class="ui input" data-bind="validationOptions: {insertMessages: false}">
+                            <input type="text" data-bind="value: Model.TenantsCount, valueUpdate:'afterkeydown'" />
+                        </div>
+                        <div class="validationMessage" data-bind="validationMessage: Model.TenantsCount"></div>
+                    </div>
+                    <div class="field">
+                        <label>Note <span class="red-asterisk">*</span></label>
+                        <div class="ui input" data-bind="validationOptions: {insertMessages: false}">
+                            <textarea rows="5" style="height:83px;" data-bind="value: Model.Note, valueUpdate:'afterkeydown'"></textarea>
+                        </div>
+                        <div class="validationMessage" data-bind="validationMessage: Model.Note"></div>
+                    </div>
+                    <div class="field">
+                        <div class="field">
+                            <label>Please upload your photos here</label>
+                            <div class="ui fluid segment upload-box te-logo">
+                                <div class="center aligned four column row">
+                                    <div class="column">
+                                        <div data-bind="foreach: MediaFiles">
+                                            <div class="ui fluid segment image-box">
+                                                <div class="column">
+                                                    <div class="image">
+                                                        <div class="ui minix images" data-bind="if: ko.utils.unwrapObservable(MediaType) === 2">
+                                                            <img class="ui image" />
+                                                        </div>
+                                                        <div class="ui minix images" data-bind="ifnot: ko.utils.unwrapObservable(MediaType) === 2">
+                                                            <img class="ui image" data-bind="attr: {src: Data}" />
+                                                        </div>
+                                                    </div>
+                                                    <i class="remove sign icon" data-bind="click: $root.RemoveFile"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <p class="text-muted hint-style" data-bind="text: fileInstructions"></p>
+                            <div class="ui teal button upload-button">
+                                <i class="cloud upload icon"></i>
+                                Choose Files
+                                <input type="file"
+                                       id="file-upload"
+                                       class="key-upload"
+                                       data-bind="filesUpload : MediaFiles,
+                          fileWarning : FileWarning,
+                          validFileTypes : ValidFiles,
+                          maxFiles: MaxFiles,
+                          totalMaxSize : MaxSize,
+                          sizeError : fileSizeError" multiple />
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="field text-center">
+                        <div class="ui grid">
+                            <div class="center aligned column">
+                                <button class="ui teal button" data-bind="click: $root.SubmitApp, enable : IsValid">Submit</button>
+                                <button class="ui button" data-bind="click : $root.ShowMain">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+
+    <!--Tenant info view-->
+    <div data-bind="visible : TenantInfoView" style="display:none;">
+        <div style="width : 80%; margin : auto">
+            <h3>Please add your details to continue</h3>
+        </div>
+        <hr />
+        <div class="row">
+            <div class="col-md-12">
+                <div style="width : 90%; margin : auto">
+                    <button class="btn btn-group btn-info" data-bind="click:ShowMain">Back to Previous Page</button>
+                </div>
+            </div>
+        </div>
+        <form class="step-form" style="margin-bottom:20px" data-bind="with : TenantInfo ">
+            <div class="row">
+                <div class="col-md-12">
+                    <h3></h3>
+                </div>
+            </div>
+            <fieldset style="width:90%">
+                <div data-bind="stopBinding : true">
+                    <div id="tenantDetailForm">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label class="control-label">Date of Birth <span style="color:red;">*</span></label>
+                                    <input type="text" id="DOB" style="padding-left:10px" class="form-control" name="DateOfBirth" placeholder="&nbsp mm/dd/yyyy"
+                                           data-bind="value : DateOfBirth" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label class="control-label">Home Phone Number<span style="color:red"></span></label>
+                                    <input class="form-control" type="text" data-bind="value: HomePhoneNumber, valueUpdate:'afterkeydown'" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label class="control-label">Mobile Phone Number<span style="color:red"></span></label>
+                                    <input class="form-control" type="text" data-bind="value: MobilePhoneNumber, valueUpdate:'afterkeydown'" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label class="control-label">Current Address<span style="color:red"></span></label>
+                                    <input class="form-control" type="text" data-bind="value : AddressField, addressAutocomplete : Address, valueUpdate:'afterkeydown'" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label class="control-label">Please upload your photos here<span style="color:red;"></span></label>
+                                <div class="panel panel-default">
+                                    <div class="panel-body">
+                                        <div style="height:150px">
+                                            <div data-bind="if:fileSrc">
+                                                <div class="col-md-2 col-sm-3 col-xs-4">
+                                                    <div class="thumbnail">
+                                                        <a data-bind="click: $root.removePhoto">
+                                                            <i class="zmdi zmdi-close-circle" style="float:right"></i>
+                                                        </a>
+                                                        <img class="img-responsive" data-bind="attr: {src: fileSrc}" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="btn btn-success">
+                                    <span class="fa fa-cloud-upload"></span>
+                                    Choose Files
+                                    <input type="file" id="file-upload" class="key-upload" data-bind="event:{change:fileSelect}" accept="image/*" />
+                                </div>
+
+                                <div class="form-group">
+                                    <p class="text-muted" style="font-size:11px; text-align : left">Max size is 2 MB each and supported file types are *.jpg, *.jpeg, *.png, & *.gif</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 text-center">
+
+                                <button class="btn btn-success" data-bind="enable : IsValid , click: $root.SubmitTenantInfo">Submit</button>
+                                <button class="btn btn-group btn-danger" data-bind="click:ShowMain">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+
+    <!--Delete from watchlist-->
+    <div id="deleteRequest" data-bind="visible : $root.ShowDelete" style="display:none">
+        <h3>Remove from Watchlist</h3>
+        <hr />
+        <button class="btn btn-info btn-sx" data-bind="click:$root.ShowMain"><span class="fa fa-arrow-left"></span> Back</button>
+        <br /><br />
+        <div class="row">
+            <div class="col-md-12" style="padding-bottom: 100px;">
+                <div class="panel panel-default" data-bind="with : SelectedItem">
+                    <div class="panel-heading">
+                        Are you sure you want to remove this property from watchlist?
+                    </div>
+                    <div class="panel-body">
+                        <h4 data-bind="text : Model.Title"></h4>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <span data-bind="text:Property.Bedroom"></span>&nbsp;<i class="fa fa-bed"></i>
+                                &nbsp;&nbsp;<span data-bind="text:Property.Bathroom"></span>&nbsp;<i class="fa fa-shower"></i>
+                                &nbsp;&nbsp;<span data-bind="text:Property.ParkingSpace"></span>&nbsp;<i class="fa fa-car"></i>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <strong>Id: </strong>
+                            </div>
+                            <div class="col-md-9">
+                                # <span data-bind="text : Model.Id"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <strong>Location: </strong>
+                            </div>
+                            <div class="col-md-9">
+                                <div data-bind="text : StreetAddress"></div>
+                                <div data-bind="text : CitySub"></div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <strong>Rent: </strong>
+                            </div>
+                            <div class="col-md-9">
+                                $<span data-bind="numeric : Model.TargetRent"></span>&nbsp;
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <strong>Available: </strong>
+                            </div>
+                            <div class="col-md-9">
+                                <span data-bind="text : moment(Model.AvailableDate()).format('ll')"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="prop-actions">
+                    <button type="button" class="btn btn-success" data-bind="click:$root.confirmDelete" autofocus>Confirm</button>
+                    <button type="button" class="btn btn-danger" data-bind="click:$root.ShowMain">Cancel</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+}
+else
+{
+    <!-- Start: delete confirmation for job watchlist -->
+    <div id="deleteJob" data-bind="visible : $root.ShowDelete" style="display:none">
+        <h3>Remove from Watchlist</h3>
+        <hr />
+        <button class="btn btn-info btn-sx" data-bind="click:$root.ShowMain"><span class="fa fa-arrow-left"></span> Back</button>
+        <br /><br />
+        <div class="row">
+            <div class="col-md-12" style="padding-bottom: 100px;">
+                <div class="panel panel-default" data-bind="with : SelectedItem">
+                    <div class="panel-heading">
+                        Are you sure you want to remove this job from watchlist?
+                    </div>
+                    <div class="panel-body">
+                        <h4 data-bind="text : Model.Title"></h4>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <strong>Listed on: </strong>
+                            </div>
+                            <div class="col-md-8">
+                                <span data-bind="text :  moment(Model.PostedDate()).format('ll')"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <strong>Budget: </strong>
+                            </div>
+                            <div class="col-md-8">
+                                $<span data-bind="numeric :  Model.MaxBudget"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <strong>Address: </strong>
+                            </div>
+                            <div class="col-md-8">
+                                <div>
+                                    <span data-bind="text : StreetAddress"></span>
+                                    <span data-bind="text : CitySub"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row" style="height:50px;">
+                            <div class="col-md-4">
+                                <strong>Description: </strong>
+                            </div>
+                            <div class="col-md-8">
+                                <div data-bind="text : Model.JobDescription"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="prop-actions">
+                    <button type="button" class="btn btn-success" data-bind="click:$root.confirmDelete" autofocus>Confirm</button>
+                    <button type="button" class="btn btn-danger" data-bind="click:$root.ShowMain">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div> <!-- /div delete-job -->
+    <!-- End: delete confirmation for job watchlist -->
+
+    <!-- Start: detail view for job watchlist -->
+    <div data-bind="visible: DetailView" style="display : none">
+        <div id="marketJobDetails" data-bind="with : SelectedItem">
+            <h3>Job Details</h3>
+            <hr />
+            <button class="btn btn-info btn-sx" data-bind="click: $root.ShowMain"><span class="fa fa-arrow-left"></span> Back</button>
+            <br /><br />
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <span class="h4"><span data-bind="text: Model.Title"></span></span>
+                            <div class="col-md-1 no-padding-side" style="margin-top : 7px; right : 0px; transform: translateY(-50%); float : right">
+                                <button class="btn btn-success" data-bind="click:$root.ShowApply" style="margin-top : 7px ;"><span class="zmdi zmdi-edit"></span> Apply</button>
+                            </div>
+
+                        </div>
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <!--details coloumn-->
+                                    <div class="row" style="line-height : 25px">
+                                        <div class="col-md-4" style="padding-right : 0px;">
+                                            <strong>Location:</strong>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <span data-bind="text: StreetAddress"></span>
+                                            <span data-bind="text: CitySub"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="line-height : 25px">
+                                        <div class="col-md-4" style="padding-right : 0px;">
+                                            <strong>Maximum Budget:</strong>
+                                        </div>
+                                        <div class="col-md-8">
+                                            $<span data-bind="numeric:Model.MaxBudget"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="line-height : 25px">
+                                        <div class="col-md-4" style="padding-right : 0px;">
+                                            <strong>Description:</strong>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <span data-bind="text:Model.JobDescription" style="word-break: break-all;"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="line-height : 25px">
+                                        <div class="col-md-4" style="padding-right : 0px;">
+                                            <strong>Listed on:</strong>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <span data-bind="text :moment(Model.PostedDate()).format('ll')"></span>
+                                        </div>
+                                    </div>
+                                    <br />
+                                </div> <!--details coloumn-->
+
+                                <div class="col-md-4" style="margin-left:150px; height:250px;">
+                                    <div class="carousel" data-ride="carousel" data-bind="attr :{id : 'detail-carousel'+ Model.Id() + ''}, visible:ImgFiles().length > 0">
+                                        <div class="carousel-inner" style="margin:auto" data-bind="foreach: ImgFiles">
+                                            <div class="item" data-bind="css:{active: $index() == 0}">
+                                                <a data-bind="attr: {href: Data}" download>
+                                                    <img class="ui centered image" data-bind="attr: {src: Data}" onerror="this.src = '/images/no-prop-img.png'" style="width : 270px; height : 230px" />
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <a class="left carousel-control" data-slide="prev" data-bind="attr : {href : '#' + 'detail-carousel'+ Model.Id() + ''}, if : ImgFiles().length > 1">
+                                            <span class="fa fa-2x fa-angle-left"></span>
+                                            <span class="sr-only">Previous</span>
+                                        </a>
+                                        <a class="right carousel-control" data-slide="next" data-bind="attr : {href : '#' + 'detail-carousel'+ Model.Id() + ''}, if : ImgFiles().length > 1">
+                                            <span class="fa fa-2x fa-angle-right"></span>
+                                            <span class="sr-only">Next</span>
+                                        </a>
+                                    </div>
+                                    <img class="ui centered image" data-bind="visible:ImgFiles().length<=0" src="/images/no-prop-img.png" alt="noPropImg" style="width : 270px; height : 230px" />
+
+                                </div><!--photo coloum-->
+                            </div><!-- row-->
+                        </div> <!--panel body-->
+                        <div class="panel-body" data-bind="visible : $root.HasMapData()">
+                            <ul class="nav nav-tabs" role="tablist" style="margin-bottom : 10px">
+                                <li role="presentation" class="active" data-bind="clickShowMap : Address"><a href="#map-location" aria-controls="home" role="tab" data-toggle="tab">Location</a></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div role="tabpanel" class="tab-pane active" id="map-location">
+                                    <div id="map"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div><!--panel-->
+                </div><!--coloumn-->
+            </div><!--coloumn-->
+        </div><!--marketJobDetails-->
+    </div> <!--marketJob-->
+    <!-- End: detail view for job watchlist -->
+
+    <!-- Start: apply view for job watchlist -->
+    <div id="applyDetail" style="display:none" data-bind="visible : ApplyView">
+        <div class="row">
+            <div style="width : 80%; margin : auto">
+                <h3>Job Quotes</h3>
+                <hr />
+                <button class="btn btn-info btn-sx" data-bind="click : $root.ShowMain"><span class="fa fa-arrow-left"></span> Back</button>
+                <br /><br />
+            </div>
+        </div>
+        <div class="row" style="padding-bottom: 100px">
+            <form class="step-form" style="margin-bottom:20px" data-bind="with : JobQuote">
+                <fieldset>
+                    <div class="panel panel-default" data-bind="with : $root.SelectedItem">
+                        <div class="panel-heading">
+                            Job Information
+                        </div>
+                        <div class="panel-body">
+                            <div style="margin-top:5px">
+                                <label class="control-label">Title : </label> <span data-bind="text : Model.Title"></span>
+                            </div>
+                            <div style="margin-top:5px">
+                                <label class="control-label">Job Description : </label> <span class="detailspan" data-bind="text : Model.JobDescription" style="word-break: break-all;"></span>
+                            </div>
+                            <div style="margin-top:5px">
+                                <label class="control-label">Location :</label>
+                                <span data-bind="text: StreetAddress"></span>
+                                <span data-bind="text: CitySub"></span>
+                            </div>
+                            <div style="margin-top:5px">
+                                <label class="control-label">Budget : </label> $<span data-bind="numeric:Model.MaxBudget"></span>
+                            </div>
+                        </div><!--panel body-->
+                    </div><!--panel-->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="control-label">Enter Amount <span style="color:red;">*</span></label>
+                                <input class="form-control" type="text" data-bind="trimTo2dp, value: Model.Amount, valueUpdate:'afterkeydown'" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="control-label">Note <span style="color:red;">*</span></label>
+                                <textarea class="form-control" rows="5" style="height:123px;" maxlength="500" data-bind="value: Model.Note, valueUpdate:'afterkeydown'"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--MediaFiles undefined-->
+                    @*<div class="row">
+                        <div class="col-md-12">
+                            <div class="field">
+                                <label>Please upload your photos here</label>
+                                <div class="ui fluid segment upload-box te-logo">
+                                    <div class="center aligned four column row">
+                                        <div class="column">
+                                            <div data-bind="foreach: MediaFiles">
+                                                <div class="ui fluid segment image-box">
+                                                    <div class="column">
+                                                        <div class="image">
+                                                            <div class="ui minix images" data-bind="if: ko.utils.unwrapObservable(MediaType) === 2">
+                                                                <img class="ui image" src="/images/pdficon.png" />
+                                                            </div>
+                                                            <div class="ui minix images" data-bind="ifnot: ko.utils.unwrapObservable(MediaType) === 2">
+                                                                <img class="ui image" data-bind="attr: {src: Data}" />
+                                                            </div>
+                                                        </div>
+                                                        <i class="remove sign icon" data-bind="click: $root.RemoveFile"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="field">
+                                <p class="text-muted hint-style" data-bind="text: fileInstructions"></p>
+                                <div class="ui teal button upload-button">
+                                    <i class="cloud upload icon"></i>
+                                    Choose Files
+                                    <input type="file"
+                                           id="file-upload"
+                                           class="key-upload"
+                                           data-bind="filesUpload : MediaFiles,
+                          fileWarning : FileWarning,
+                          validFileTypes : ValidFiles,
+                          maxFiles: MaxFiles,
+                          totalMaxSize : MaxSize,
+                          sizeError : fileSizeError" multiple />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <p class="text-muted" style="font-size:11px; text-align : left">You may upload up to 5 files. Max size is 2 MB each and supported file types are *.jpg, *.jpeg, *.png, *.gif, *.pdf & *.doc*</p>
+                            </div>
+                        </div>
+                    </div>*@
+                    <div class="row">
+                        <div class="col-md-12 text-center" style="padding-bottom: 30px">
+                            <button class="btn btn-success" data-bind="enable: IsValid, click: $root.SubmitQuote">Submit</button>
+                            <button class="btn btn-group btn-danger" data-bind="click:$root.ShowMain">Close</button>
+                        </div>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+    <!-- End: apply view for job watchlist -->
+
+    <!-- Start: supplier info view -->
+    <div data-bind="visible : SupplierInfoView" style="display:none">
+        <div class="row">
+            <div style="width : 90%; margin : auto">
+                <div class="block-header page-title">
+                    <h3>Please add your details to continue</h3>
+                </div>
+                <hr />
+            </div>
+        </div>
+
+        <div class="row">
+            <button class="btn btn-info btn-sx" style="margin-left:70px;" data-bind="click: $root.ShowMain">Back to previous page</button>
+        </div>
+        <form class="step-form" style="margin-bottom:20px" data-bind="with : SupplierInfo">
+            <ul id="progressbar" style="left:80px;">
+                <li id="cd" class="active">Service Provider Details</li>
+                <li id="ca">Service Provider Address</li>
+            </ul>
+            <fieldset style="width:90%">
+                <div data-bind="">
+                    <div id="CompanyDetailForm">
+                        <div id="firstPage" data-bind="visible:ShowFirst">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label class="control-label">Business Name <span style="color:red;">*</span></label>
+                                        <input type="text" class="form-control" data-bind="value : Model.Name, valueUpdate:'afterkeydown'" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label class="control-label">Phone Number <span style="color:red;">*</span></label>
+                                        <input type="text" class="form-control" data-bind="value : Model.PhoneNumber, valueUpdate:'afterkeydown'" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label class="control-label">Website </label>
+                                        <input type="text" class="form-control" data-bind="value : Model.Website, valueUpdate:'afterkeydown'" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label class="control-label">Please upload your company logo here<span style="color:red;"></span></label>
+                                </div>
+                                <br />
+                                <div class="col-md-4">
+                                    <div class="panel panel-default">
+                                        <div style="height:150px">
+                                            <div data-bind="if:ImgData">
+                                                <div class="thumbnail" style="position: relative">
+                                                    <a class="zmdi zmdi-close-circle" data-bind="removeFile : Model.PhotoFile, display : ImgData, element : 'file-upload'" style="position:absolute; top : 0; right : 1px">
+                                                    </a>
+                                                    <img class="img-responsive" data-bind="attr: {src: ImgData}" style="max-height : 140px" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="btn btn-success">
+                                        <span class="fa fa-cloud-upload"></span>
+                                        Choose Files
+                                        <input type="file" id="file-upload" class="key-upload" data-bind="uploadFile : Model.PhotoFile, display : ImgData, validFileTypes : validFileTypes" accept="image/*" />
+                                    </div>
+                                    <div class="form-group">
+                                        <p class="text-muted" style="font-size:11px; text-align : left">Max size is 2 MB and supported file types are *.jpg, *.jpeg, *.png, & *.gif</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <br />
+                            <div class="row">
+                                <div class="col-md-12 text-center">
+                                    <button class="btn btn-primary" data-bind="click:ToNext, enable : FirstPageValid">Next</button>
+                                    <button class="btn btn-danger" data-bind="click : $root.ShowMain">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="secondPage" data-bind="visible : ShowSecond" style="display:none">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <h3>Physical Address</h3>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label class="control-label">Search Address <span style="color:red;">*</span></label>
+                                        <input class="form-control" type="text" name="searchAddress" id="autocomplete" placeholder="&nbsp Enter your address" data-bind="addressAutocomplete: Model.PhysicalAddress, valueUpdate:'afterkeydown'">
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="control-label" for="street_number">Number <span style="color:red;">*</span></label>
+                                        <input type="text" class="form-control" id="street_number" placeholder="&nbsp Number" data-bind="textInput: Model.PhysicalAddress.Number" />
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <label class="control-label" for="route">Street <span style="color:red;">*</span></label>
+                                        <input type="text" class="form-control" id="route" placeholder="&nbsp Street" data-bind="textInput: Model.PhysicalAddress.Street" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="control-label" for="route">Suburb <span style="color:red;">*</span></label>
+                                        <input type="text" class="form-control" id="route" placeholder="&nbsp Suburb" data-bind="textInput: Model.PhysicalAddress.Suburb" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="control-label" for="street_number">City <span style="color:red;">*</span></label>
+                                        <input type="text" class="form-control" id="street_number" placeholder="&nbsp City" data-bind="textInput: Model.PhysicalAddress.City" />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="control-label" for="street_number">Postcode <span style="color:red;">*</span></label>
+                                        <input type="text" class="form-control" id="street_number" placeholder="&nbsp Postcode" data-bind="textInput: Model.PhysicalAddress.PostCode" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <input id="shipsame" type="checkbox" name="test" style="float:left ;width: 20px; margin-top:15px" data-bind="checked : IsShipSame" />
+                                    <label class="control-label" style="padding-left:10px;margin-top:11px;">Same Billing Address</label>
+                                </div>
+                            </div>
+                            <div id="shipinfo" data-bind="visible : !IsShipSame()">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <h3>Billing Address</h3>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label class="control-label">Search Address <span style="color:red;">*</span></label>
+                                            <input class="form-control" type="text" name="searchAddress" id="autocomplete" placeholder="&nbsp Enter your address" data-bind="addressAutocomplete: Model.BillingAddress, valueUpdate:'afterkeydown'">
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="control-label" for="street_number">Number <span style="color:red;">*</span></label>
+                                            <input type="text" class="form-control" id="street_number" placeholder="&nbsp Number" data-bind="textInput: Model.BillingAddress.Number" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <div class="form-group">
+                                            <label class="control-label" for="route">Street <span style="color:red;">*</span></label>
+                                            <input type="text" class="form-control" id="route" placeholder="&nbsp Street" data-bind="textInput: Model.BillingAddress.Street" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="control-label" for="route">Suburb <span style="color:red;">*</span></label>
+                                            <input type="text" class="form-control" id="route" placeholder="&nbsp Suburb" data-bind="textInput: Model.BillingAddress.Suburb" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="control-label" for="street_number">City <span style="color:red;">*</span></label>
+                                            <input type="text" class="form-control" id="street_number" placeholder="&nbsp City" data-bind="textInput: Model.BillingAddress.City" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label class="control-label" for="street_number">Postcode <span style="color:red;">*</span></label>
+                                            <input type="text" class="form-control" id="street_number" placeholder="&nbsp Postcode" data-bind="textInput: Model.BillingAddress.PostCode" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row"></div>
+                            </div>
+                            <br />
+                            <div class="row">
+                                <div class="col-md-12 text-center">
+                                    <button class="btn btn-primary" data-bind="click:ToPrevious">Previous</button>
+                                    <button class="btn btn-primary" data-bind="click: $root.SubmitSupplierInfo, enable : SecondPageValid">Submit</button>
+                                    <button class="btn btn-danger" data-bind="click : $root.ShowMain">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+    <!-- End: supplier info view -->
+}
+@Html.AntiForgeryToken()
+
+
+<script src="/Scripts/Personal/Watchlist.js"></script>
+<link href="/Content/semantic.min.css" rel="stylesheet" />
+<script>
+
+    $(document).ready(function () {
+
+        var dataVm = ko.mapping.fromJS( @Html.Raw(Json.Encode(Model)));
+        console.log(dataVm);
+        if (dataVm.ItemType() === 1) {
+
+            if (dataVm.SearchCount() === 0) {
+                $(".ui.modal").modal("show");
+            }
+            $("#searchId").val("");
+            vm = new RentalWatchlistViewModel(dataVm);
+
+        }
+
+        else {
+
+            vm = new MaketJobWatchlistViewModel(dataVm);
+
+        }
+        ko.applyBindings(vm);
+    });
+</script>
